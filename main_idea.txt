@@ -1,0 +1,12 @@
+The implementation can be broken down into the 2 blocks.
+
+
+10.1 AES encryption block for key generation: due to the lack of any Public Key Infrastructure (PKI) in the ETC-transponder protocol, we can implement a simple PKI to mitigate a majority of the risks associated with the protocol. An AES-256 (or AES-192 for more speed but slightly less security) cipher block can be used to encrypt the key. To note, AES-256 is an industry standard encryption scheme which is estimated to take about a billion years to brute force using a commercial supercomputer. Safe to say, the encrypted payload (which can now be termed as ciphertext) will be safe if the attacker cannot identify the key used to encrypt the plaintext.
+
+10.2 Real time entropy-based key generation: with the bulk of the work carried by the AES cipher block, it's now up to us to build a realistic key generation model. The obvious choice while building a key generation algorithm in a moving environment is using physical factors to generate a sense of randomness or entropy. 
+
+An ideal case entropy source would be vibrations in the road. A commercial FPGA can be used to detect motion changes in a sensor whenever an automobile runs on a surface. Vibration is an amazing source of entropy since it can be caused by a multitude of factors including but not limited to tire movement, engine rumbling and even passenger movement in a car. These interrupts can be mapped to a fixed length dynamically allocated buffer which can be used as a key for the AES block cipher.
+
+A more realistic case of entropy would be measuring the speed and taking a tenth of it with the time taken over the current time of day in a HHMMSS format. For example, if the car communicates with the transponder at 2:14:30 pm going 82 miles an hour, the generated key will be taken as 141430 as our time raised to 8.2 (since a higher power will give us a key length higher than what AES can take) which gives us a completely unique and unclonable key with a wide range so key length is never constant[10]. For consistency we can put this key through a hash to standardize the output length to 192 if we are using AES-192 and 256 if we are using AES-256 which is maximum key size for both of these cipher blocks [2].
+
+This creates a completely unbreakable encryption scheme for our payload system which even if sniffed by adversaries, cannot be decrypted to reveal sensitive information.
